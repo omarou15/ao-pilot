@@ -1,12 +1,15 @@
-import pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 
 export async function parsePdf(
   buffer: Buffer
 ): Promise<{ text: string; pages: number }> {
   try {
-    const data = await pdfParse(buffer);
-    const text = data.text?.trim() ?? '';
-    const pages = data.numpages ?? 0;
+    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+    const textResult = await parser.getText();
+    const text = textResult.text?.trim() ?? '';
+    const pages = textResult.total ?? 0;
+
+    await parser.destroy();
 
     if (!text) {
       console.warn(

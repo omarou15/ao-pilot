@@ -14,7 +14,7 @@ export async function parseExcel(
   buffer: Buffer
 ): Promise<{ sheets: ExcelSheet[] }> {
   try {
-    const workbook = XLSX.read(buffer, { type: 'buffer', cellMerges: true });
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
     const sheets: ExcelSheet[] = [];
 
     for (const sheetName of workbook.SheetNames) {
