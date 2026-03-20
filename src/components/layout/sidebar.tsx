@@ -76,7 +76,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* User button */}
       <div className="border-t border-zinc-200 px-4 py-4">
         <UserButton
-          afterSignOutUrl="/"
           appearance={{
             elements: {
               rootBox: "w-full",
