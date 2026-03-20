@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "AO Pilot — Réponse aux Appels d'Offres BTP",
+  title: "AO Pilot — Réponse automatisée aux appels d'offres BTP",
   description:
     "Automatisez vos réponses aux appels d'offres BTP : DPGF chiffré, mémoire technique et documents administratifs en quelques heures.",
 };
@@ -29,7 +29,7 @@ export default function RootLayout({
     <ClerkProvider localization={frFR}>
       <html
         lang="fr"
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">{children}</body>
       </html>

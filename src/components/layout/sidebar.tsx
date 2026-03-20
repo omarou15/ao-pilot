@@ -8,6 +8,9 @@ import {
   FolderKanban,
   Settings,
   ShieldCheck,
+  HardHat,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -34,18 +37,46 @@ const navItems = [
   },
 ]
 
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+interface SidebarProps {
+  onNavigate?: () => void
+  isCollapsed?: boolean
+  onToggleCollapse?: () => void
+}
+
+export function Sidebar({ onNavigate, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-zinc-200 bg-white">
+    <div
+      className={cn(
+        "flex h-full flex-col bg-gradient-to-b from-[#1e3a5f] to-[#152d4a] transition-all duration-300",
+        isCollapsed ? "w-16" : "w-64"
+      )}
+    >
       {/* Logo */}
-      <div className="flex h-16 items-center border-b border-zinc-200 px-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight text-zinc-900">
-            AO Pilot
-          </span>
+      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
+        <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden">
+          <HardHat className="h-6 w-6 shrink-0 text-orange-400" />
+          {!isCollapsed && (
+            <span className="text-xl font-bold tracking-tight text-white font-[family-name:var(--font-space-grotesk)]">
+              AO Pilot
+            </span>
+          )}
         </Link>
+        {onToggleCollapse && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="hidden lg:flex rounded-md p-1.5 text-white/50 hover:text-white hover:bg-white/10 transition-colors duration-200"
+            aria-label={isCollapsed ? "Déplier le menu" : "Replier le menu"}
+          >
+            {isCollapsed ? (
+              <PanelLeft className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -59,27 +90,32 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
+              title={isCollapsed ? item.label : undefined}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-200",
                 isActive
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                  ? "bg-white/15 text-white border-l-3 border-orange-400"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
               )}
             >
-              <Icon className="h-4 w-4 shrink-0" />
-              {item.label}
+              <Icon className="h-4 w-4 shrink-0 text-white" />
+              {!isCollapsed && item.label}
             </Link>
           )
         })}
       </nav>
 
       {/* User button */}
-      <div className="border-t border-zinc-200 px-4 py-4">
+      <div className="border-t border-white/10 px-4 py-4">
         <UserButton
           appearance={{
             elements: {
-              rootBox: "w-full",
-              userButtonTrigger: "w-full justify-start",
+              rootBox: isCollapsed ? "w-8" : "w-full",
+              userButtonTrigger: cn(
+                "w-full justify-start",
+                isCollapsed && "justify-center"
+              ),
+              userButtonAvatarBox: "w-8 h-8",
             },
           }}
         />
