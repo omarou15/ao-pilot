@@ -33,12 +33,20 @@ function formatDate(dateStr: string): string {
 }
 
 function formatDetails(details: Record<string, unknown>): string {
-  if (!details || Object.keys(details).length === 0) return "—"
+  if (!details || Object.keys(details).length === 0) return "\u2014"
   try {
     return JSON.stringify(details, null, 0).slice(0, 120)
   } catch {
-    return "—"
+    return "\u2014"
   }
+}
+
+function getActionDotColor(action: string): string {
+  if (action.startsWith("project.")) return "bg-blue-500"
+  if (action.startsWith("files.")) return "bg-green-500"
+  if (action.startsWith("company.")) return "bg-[#e67e22]"
+  if (action.startsWith("audit.")) return "bg-slate-500"
+  return "bg-slate-400"
 }
 
 export function AuditTable({
@@ -51,6 +59,14 @@ export function AuditTable({
 }: AuditTableProps) {
   const limit = 50
   const totalPages = Math.max(1, Math.ceil(total / limit))
+
+  // Generate page numbers to display (show up to 5 around current)
+  const pageNumbers: number[] = []
+  const startPage = Math.max(1, page - 2)
+  const endPage = Math.min(totalPages, page + 2)
+  for (let i = startPage; i <= endPage; i++) {
+    pageNumbers.push(i)
+  }
 
   return (
     <div className="space-y-4">
@@ -70,19 +86,19 @@ export function AuditTable({
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Utilisateur</TableHead>
-              <TableHead>Projet</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Détails</TableHead>
+            <TableRow className="bg-slate-50">
+              <TableHead className="text-slate-600 font-medium">Date</TableHead>
+              <TableHead className="text-slate-600 font-medium">Utilisateur</TableHead>
+              <TableHead className="text-slate-600 font-medium">Projet</TableHead>
+              <TableHead className="text-slate-600 font-medium">Action</TableHead>
+              <TableHead className="text-slate-600 font-medium">D&eacute;tails</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {entries.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  Aucune entrée trouvée.
+                  Aucune entr&eacute;e trouv&eacute;e.
                 </TableCell>
               </TableRow>
             ) : (
@@ -90,13 +106,14 @@ export function AuditTable({
                 <TableRow key={entry.id}>
                   <TableCell>{formatDate(entry.created_at)}</TableCell>
                   <TableCell className="font-mono text-xs">
-                    {entry.user_id ? entry.user_id.slice(0, 8) + "..." : "—"}
+                    {entry.user_id ? entry.user_id.slice(0, 8) + "..." : "\u2014"}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
-                    {entry.project_id ? entry.project_id.slice(0, 8) + "..." : "—"}
+                    {entry.project_id ? entry.project_id.slice(0, 8) + "..." : "\u2014"}
                   </TableCell>
                   <TableCell>
-                    <span className="rounded bg-muted px-2 py-0.5 text-xs font-medium">
+                    <span className="inline-flex items-center gap-1.5 rounded bg-muted px-2 py-0.5 text-xs font-medium">
+                      <span className={`w-2 h-2 rounded-full ${getActionDotColor(entry.action)}`} />
                       {entry.action}
                     </span>
                   </TableCell>
@@ -112,17 +129,58 @@ export function AuditTable({
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {total} entrée{total !== 1 ? "s" : ""} au total — Page {page} / {totalPages}
+          {total} entr&eacute;e{total !== 1 ? "s" : ""} au total &mdash; Page {page} / {totalPages}
         </p>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
           <Button
             variant="outline"
             size="sm"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
-            Précédent
+            Pr&eacute;c&eacute;dent
           </Button>
+          {startPage > 1 && (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(1)}
+                className="w-9 px-0"
+              >
+                1
+              </Button>
+              {startPage > 2 && (
+                <span className="px-1 text-muted-foreground text-sm">...</span>
+              )}
+            </>
+          )}
+          {pageNumbers.map((p) => (
+            <Button
+              key={p}
+              variant={p === page ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPageChange(p)}
+              className={`w-9 px-0 ${p === page ? "bg-[#1e3a5f] text-white hover:bg-[#1e3a5f]/90" : ""}`}
+            >
+              {p}
+            </Button>
+          ))}
+          {endPage < totalPages && (
+            <>
+              {endPage < totalPages - 1 && (
+                <span className="px-1 text-muted-foreground text-sm">...</span>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onPageChange(totalPages)}
+                className="w-9 px-0"
+              >
+                {totalPages}
+              </Button>
+            </>
+          )}
           <Button
             variant="outline"
             size="sm"

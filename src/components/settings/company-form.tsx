@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Building2, Camera } from "lucide-react"
 
 interface CompanyFormProps {
   company: Company
@@ -46,59 +47,65 @@ export function CompanyForm({ company, onSave, isSaving }: CompanyFormProps) {
   }
 
   return (
-    <Card>
+    <Card className="shadow-md rounded-xl">
       <CardHeader>
-        <CardTitle>Informations de l&apos;entreprise</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Building2 className="w-5 h-5 text-[#1e3a5f]" />
+          Informations de l&apos;entreprise
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="company-name">Nom de l&apos;entreprise *</Label>
-            <Input
-              id="company-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Nom de votre entreprise"
-            />
+          {/* Logo area */}
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center shrink-0">
+              <Camera className="w-6 h-6 text-slate-400" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-700">Logo de l&apos;entreprise</p>
+              <p className="text-xs text-muted-foreground">
+                La fonctionnalit&eacute; d&apos;upload de logo sera disponible prochainement.
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="company-siret">SIRET</Label>
-            <Input
-              id="company-siret"
-              value={siret}
-              onChange={(e) => handleSiretChange(e.target.value)}
-              placeholder="14 chiffres"
-              maxLength={14}
-              pattern="\d{14}"
-            />
-            {siretError && (
-              <p className="text-sm text-destructive">{siretError}</p>
-            )}
-          </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="company-name">Nom de l&apos;entreprise *</Label>
+              <Input
+                id="company-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Nom de votre entreprise"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="company-address">Adresse</Label>
-            <Textarea
-              id="company-address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="Adresse de l'entreprise"
-              rows={3}
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="company-siret">SIRET</Label>
+              <Input
+                id="company-siret"
+                value={siret}
+                onChange={(e) => handleSiretChange(e.target.value)}
+                placeholder="14 chiffres"
+                maxLength={14}
+                pattern="\d{14}"
+              />
+              {siretError && (
+                <p className="text-sm text-destructive">{siretError}</p>
+              )}
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="company-logo">Logo</Label>
-            <Input
-              id="company-logo"
-              disabled
-              placeholder="Upload logo — à venir"
-            />
-            <p className="text-xs text-muted-foreground">
-              La fonctionnalité d&apos;upload de logo sera disponible prochainement.
-            </p>
+            <div className="space-y-2">
+              <Label htmlFor="company-address">Adresse</Label>
+              <Textarea
+                id="company-address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Adresse de l'entreprise"
+                rows={3}
+              />
+            </div>
           </div>
 
           <Button type="submit" disabled={isSaving || !name.trim()}>

@@ -16,6 +16,7 @@ import { FileDropzone } from "@/components/upload/file-dropzone"
 import { FileList } from "@/components/upload/file-list"
 import { UploadProgress } from "@/components/upload/upload-progress"
 import { useUpload } from "@/lib/hooks/use-upload"
+import { Check } from "lucide-react"
 import type { ApiResponse, Project } from "@/lib/types"
 
 type ProjectSource = "public" | "private"
@@ -100,14 +101,14 @@ export default function NewProjectPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-6">
       {/* Step indicator */}
-      <div className="flex items-center gap-3">
-        <StepBadge number={1} active={step === 1} completed={step === 2} />
-        <div className="h-px flex-1 bg-border" />
-        <StepBadge number={2} active={step === 2} completed={false} />
+      <div className="flex items-center justify-center gap-0">
+        <StepCircle number={1} active={step === 1} completed={step === 2} />
+        <div className={`h-0.5 w-16 ${step === 2 ? "bg-[#1e3a5f]" : "bg-slate-200"}`} />
+        <StepCircle number={2} active={step === 2} completed={false} />
       </div>
 
       {step === 1 && (
-        <Card>
+        <Card className="shadow-md rounded-xl">
           <CardHeader>
             <CardTitle>Nouveau projet</CardTitle>
             <CardDescription>
@@ -167,7 +168,7 @@ export default function NewProjectPage() {
       )}
 
       {step === 2 && (
-        <Card>
+        <Card className="shadow-md rounded-xl">
           <CardHeader>
             <CardTitle>Documents DCE</CardTitle>
             <CardDescription>
@@ -213,7 +214,7 @@ export default function NewProjectPage() {
   )
 }
 
-function StepBadge({
+function StepCircle({
   number,
   active,
   completed,
@@ -224,15 +225,15 @@ function StepBadge({
 }) {
   return (
     <div
-      className={`flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
-        active
-          ? "bg-primary text-primary-foreground"
-          : completed
-            ? "bg-primary/20 text-primary"
-            : "bg-muted text-muted-foreground"
+      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${
+        completed
+          ? "bg-[#27ae60] text-white"
+          : active
+            ? "bg-[#1e3a5f] text-white"
+            : "bg-slate-200 text-slate-500"
       }`}
     >
-      {completed ? "\u2713" : number}
+      {completed ? <Check className="w-5 h-5" /> : number}
     </div>
   )
 }

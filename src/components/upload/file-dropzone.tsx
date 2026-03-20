@@ -75,12 +75,12 @@ export function FileDropzone({ onFilesAdded, disabled = false }: FileDropzonePro
       className={cn(
         "flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-pointer",
         isDragOver
-          ? "border-primary bg-primary/5 text-primary"
-          : "border-muted-foreground/25 text-muted-foreground hover:border-muted-foreground/50",
+          ? "border-[#1e3a5f] bg-[#1e3a5f]/5 text-[#1e3a5f]"
+          : "border-[#1e3a5f]/30 text-muted-foreground hover:border-[#1e3a5f]/60",
         disabled && "pointer-events-none opacity-50"
       )}
     >
-      <Upload className="size-8" />
+      <Upload className="w-12 h-12 text-[#1e3a5f]" />
       <div>
         <p className="text-sm font-medium">
           Glissez-d&eacute;posez vos fichiers DCE ici
@@ -88,6 +88,18 @@ export function FileDropzone({ onFilesAdded, disabled = false }: FileDropzonePro
         <p className="mt-1 text-xs text-muted-foreground">
           PDF, Excel, Word — 50 Mo max par fichier
         </p>
+      </div>
+      {/* File type badges */}
+      <div className="flex items-center gap-2 mt-1">
+        <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">
+          PDF
+        </span>
+        <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
+          Excel
+        </span>
+        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+          Word
+        </span>
       </div>
       <input
         ref={inputRef}
