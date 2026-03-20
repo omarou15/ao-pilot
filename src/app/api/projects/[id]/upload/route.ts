@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getServiceClient } from "@/lib/supabase";
 import { uploadFile } from "@/lib/storage";
 import { logAction } from "@/lib/audit";
+import { parseFile } from "@/services/parsing";
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const ACCEPTED_TYPES = [
@@ -33,9 +34,6 @@ function inferFileType(name: string): string {
       return "unknown";
   }
 }
-
-// TODO: Import parseFile from src/services/parsing when it exists
-// import { parseFile } from "@/services/parsing";
 
 /**
  * POST /api/projects/:id/upload — multifile upload endpoint
@@ -124,7 +122,6 @@ export async function POST(
       }
     }
 
-    // TODO: Define ProjectFile type in src/lib/types.ts when available
     interface ProjectFile {
       id: string;
       project_id: string;
@@ -156,15 +153,22 @@ export async function POST(
         );
       }
 
-      // TODO: Parse file content when src/services/parsing is available
-      // const parsedContent = await parseFile(buffer, file.type);
-      const parsedContent = null;
+      let parsedContent: unknown = null;
+      let fileType = inferFileType(file.name);
+
+      try {
+        const parseResult = await parseFile(buffer, file.name, file.type);
+        parsedContent = parseResult;
+        fileType = parseResult.documentType;
+      } catch (parseError) {
+        console.error(`[parseFile] Failed for ${file.name}:`, parseError);
+      }
 
       const { data: fileRecord, error: insertError } = await supabase
         .from("project_files")
         .insert({
           project_id: projectId,
-          file_type: inferFileType(file.name),
+          file_type: fileType,
           file_name: file.name,
           storage_path: path,
           mime_type: file.type,
