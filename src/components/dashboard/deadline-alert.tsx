@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import type { Project } from "@/lib/types"
 import { AlertTriangle } from "lucide-react"
@@ -35,10 +36,10 @@ export function DeadlineAlert({ projects }: DeadlineAlertProps) {
   return (
     <div
       className={cn(
-        "rounded-lg px-4 py-3",
+        "rounded-lg px-4 py-3 text-white",
         hasCritical
-          ? "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100"
-          : "bg-orange-50 text-orange-900 dark:bg-orange-950 dark:text-orange-100"
+          ? "bg-gradient-to-r from-red-500 to-red-600"
+          : "bg-gradient-to-r from-orange-400 to-orange-500"
       )}
     >
       <div className="flex items-center gap-2 font-semibold">
@@ -50,15 +51,21 @@ export function DeadlineAlert({ projects }: DeadlineAlertProps) {
         </span>
       </div>
       <ul className="mt-2 space-y-1 text-sm">
-        {urgentProjects.map((p) => (
+        {urgentProjects.map((p, index) => (
           <li key={p.id} className="flex items-center justify-between">
-            <span className="truncate">{p.name}</span>
-            <span
-              className={cn(
-                "ml-2 shrink-0 font-semibold",
-                p.daysLeft <= 1 ? "text-red-700 dark:text-red-300" : "text-orange-700 dark:text-orange-300"
-              )}
+            <Link
+              href={`/projects/${p.id}`}
+              className="truncate hover:underline"
             >
+              {p.name}
+            </Link>
+            <span className="ml-2 shrink-0 font-semibold flex items-center gap-2">
+              {index === 0 && (
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                </span>
+              )}
               {p.daysLeft === 0
                 ? "Aujourd'hui"
                 : p.daysLeft === 1

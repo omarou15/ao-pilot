@@ -26,40 +26,50 @@ export function StatsOverview({ projects }: StatsOverviewProps) {
       label: "Total projets",
       value: totalProjects,
       icon: FolderOpen,
-      color: "text-blue-600",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+      cardBg: "bg-blue-50/50",
     },
     {
       label: "En cours de revue",
       value: inReview,
       icon: Eye,
-      color: "text-orange-600",
+      iconBg: "bg-orange-100",
+      iconColor: "text-orange-600",
+      cardBg: "bg-orange-50/50",
     },
     {
       label: "Échéance proche",
       value: upcomingDeadline,
       icon: Clock,
-      color: "text-yellow-600",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
+      cardBg: "bg-amber-50/50",
     },
     {
       label: "Validés",
       value: validated,
       icon: CheckCircle,
-      color: "text-green-600",
+      iconBg: "bg-green-100",
+      iconColor: "text-green-600",
+      cardBg: "bg-green-50/50",
     },
   ]
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
-        <Card key={stat.label}>
+        <Card key={stat.label} className={`${stat.cardBg} hover:shadow-md transition-shadow duration-200`}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.label}
             </CardTitle>
-            <stat.icon className={`size-5 ${stat.color}`} />
+            <div className={`${stat.iconBg} ${stat.iconColor} p-2.5 rounded-xl`}>
+              <stat.icon className="size-5" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-3xl font-bold font-[family-name:var(--font-space-grotesk)]">{stat.value}</div>
           </CardContent>
         </Card>
       ))}

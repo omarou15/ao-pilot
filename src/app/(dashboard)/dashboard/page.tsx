@@ -61,9 +61,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Tableau de bord</h1>
+        <h1 className="text-2xl font-bold tracking-tight font-[family-name:var(--font-space-grotesk)]">
+          Tableau de bord
+        </h1>
+      </div>
+
+      {/* Quick actions bar */}
+      <div className="flex items-center gap-3">
         <Link href="/projects/new">
-          <Button>
+          <Button className="bg-[#e67e22] hover:bg-[#d35400] text-white">
             <Plus className="size-4" />
             Nouveau projet
           </Button>
@@ -76,13 +82,15 @@ export default function DashboardPage() {
 
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
-          <FolderOpen className="size-12 text-muted-foreground" />
-          <h2 className="mt-4 text-lg font-semibold">Aucun projet</h2>
+          <FolderOpen className="size-16 text-[#1e3a5f]" />
+          <h2 className="mt-4 text-lg font-semibold font-[family-name:var(--font-space-grotesk)]">
+            Aucun projet
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Créez votre premier appel d&apos;offres.
           </p>
           <Link href="/projects/new" className="mt-4">
-            <Button>
+            <Button className="bg-[#e67e22] hover:bg-[#d35400] text-white">
               <Plus className="size-4" />
               Nouveau projet
             </Button>
