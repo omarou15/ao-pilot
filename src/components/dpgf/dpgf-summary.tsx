@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress"
 import type { DpgfLine } from "@/lib/types"
+import { Layers, List, Wallet, TrendingUp } from "lucide-react"
 
 interface DpgfSummaryProps {
   lines: DpgfLine[]
@@ -56,42 +57,85 @@ export function DpgfSummary({ lines }: DpgfSummaryProps) {
       <CardHeader>
         <CardTitle className="text-base">Synthèse DPGF</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
-          <div>
-            <p className="text-xs text-muted-foreground">Lots</p>
-            <p className="text-lg font-semibold">{stats.lotCount}</p>
+          {/* Lots */}
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#1e3a5f]/10 shrink-0">
+              <Layers className="size-4 text-[#1e3a5f]" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Lots</p>
+              <p className="text-lg font-semibold">{stats.lotCount}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Lignes</p>
-            <p className="text-lg font-semibold">{stats.totalLines}</p>
+
+          {/* Lignes */}
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-500/10 shrink-0">
+              <List className="size-4 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Lignes</p>
+              <p className="text-lg font-semibold">{stats.totalLines}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Coût réel</p>
-            <p className="text-lg font-semibold">
-              {formatEuro(stats.totalCostReal)}
-            </p>
+
+          {/* Cout reel */}
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-slate-500/10 shrink-0">
+              <Wallet className="size-4 text-slate-600" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Coût réel</p>
+              <p className="text-lg font-semibold">
+                {formatEuro(stats.totalCostReal)}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">
-              Marge ({stats.marginPct.toFixed(1)}%)
-            </p>
-            <p className="text-lg font-semibold">
-              {formatEuro(stats.totalMargin)}
-            </p>
+
+          {/* Marge */}
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-[#e67e22]/10 shrink-0">
+              <TrendingUp className="size-4 text-[#e67e22]" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">
+                Marge ({stats.marginPct.toFixed(1)}%)
+              </p>
+              <p className="text-lg font-semibold">
+                {formatEuro(stats.totalMargin)}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-xs text-muted-foreground">Prix vente HT</p>
-            <p className="text-lg font-bold">{formatEuro(stats.totalPriceSale)}</p>
+
+          {/* Prix vente HT — prominent */}
+          <div className="flex items-start gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-green-500/10 shrink-0">
+              <span className="text-green-600 font-bold text-sm">HT</span>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Prix de vente HT</p>
+              <p className="text-2xl font-bold text-green-700 font-[family-name:var(--font-space-grotesk)]">
+                {formatEuro(stats.totalPriceSale)}
+              </p>
+            </div>
           </div>
         </div>
 
-        <Progress value={stats.progressPct}>
-          <ProgressLabel>Avancement chiffrage</ProgressLabel>
-          <ProgressValue>
-            {() => `${stats.pricedLines}/${stats.totalLines} lignes chiffrées`}
-          </ProgressValue>
-        </Progress>
+        {/* Progress bar with branded colors */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Avancement chiffrage</span>
+            <span className="font-medium">{stats.pricedLines}/{stats.totalLines} lignes chiffrées</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-[#e67e22] transition-all duration-500"
+              style={{ width: `${stats.progressPct}%` }}
+            />
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

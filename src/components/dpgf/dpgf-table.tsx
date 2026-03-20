@@ -10,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -38,19 +37,19 @@ type EditingCell = {
 
 const confidenceConfig: Record<
   PricingConfidence,
-  { label: string; className: string; tooltip?: string }
+  { label: string; dotColor: string; tooltip?: string }
 > = {
   high: {
     label: "Référencé",
-    className: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+    dotColor: "bg-green-500",
   },
   medium: {
     label: "Estimé",
-    className: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+    dotColor: "bg-blue-500",
   },
   low: {
     label: "À vérifier",
-    className: "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300",
+    dotColor: "bg-orange-500",
     tooltip: "Prix estimé par l'IA sans référence directe",
   },
 }
@@ -75,7 +74,10 @@ function ConfidenceBadge({ confidence }: { confidence: PricingConfidence }) {
   const config = confidenceConfig[confidence]
 
   const badge = (
-    <Badge className={cn("shrink-0", config.className)}>{config.label}</Badge>
+    <span className="inline-flex items-center gap-1.5 text-xs">
+      <span className={cn("w-2 h-2 rounded-full", config.dotColor)} />
+      {config.label}
+    </span>
   )
 
   if (config.tooltip) {
@@ -221,8 +223,8 @@ export function DpgfTable({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Détail par poste</h2>
         <Button
-          variant="outline"
           size="sm"
+          className="bg-[#e67e22] text-white hover:bg-[#d35400]"
           onClick={onTriggerPricing}
           disabled={isPricing}
         >
@@ -235,9 +237,9 @@ export function DpgfTable({
         </Button>
       </div>
 
-      <div className="rounded-lg border">
+      <div className="rounded-lg border overflow-auto">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
             <TableRow>
               <TableHead className="w-8" />
               <TableHead className="min-w-[200px]">Désignation</TableHead>
@@ -279,11 +281,11 @@ export function DpgfTable({
             })}
           </TableBody>
           <TableFooter>
-            <TableRow>
-              <TableCell colSpan={9} className="text-right font-bold">
+            <TableRow className="bg-[#1e3a5f]/5">
+              <TableCell colSpan={9} className="text-right font-bold text-[#1e3a5f]">
                 Total général HT
               </TableCell>
-              <TableCell className="text-right font-bold">
+              <TableCell className="text-right font-bold text-[#1e3a5f] text-base">
                 {formatEuro(grandTotal)}
               </TableCell>
               <TableCell />
@@ -324,20 +326,20 @@ function LotGroup({
     <>
       {/* Lot header row */}
       <TableRow
-        className="cursor-pointer bg-muted/30 hover:bg-muted/50"
+        className="cursor-pointer bg-[#1e3a5f]/5 hover:bg-[#1e3a5f]/10"
         onClick={() => onToggleLot(lot)}
       >
         <TableCell>
           {isCollapsed ? (
-            <ChevronRight className="size-4" />
+            <ChevronRight className="size-4 text-[#1e3a5f]" />
           ) : (
-            <ChevronDown className="size-4" />
+            <ChevronDown className="size-4 text-[#1e3a5f]" />
           )}
         </TableCell>
-        <TableCell colSpan={8} className="font-semibold">
+        <TableCell colSpan={8} className="font-semibold text-[#1e3a5f]">
           {lot}
         </TableCell>
-        <TableCell className="text-right font-semibold">
+        <TableCell className="text-right font-semibold text-[#1e3a5f]">
           {formatEuro(lotSubtotal)}
         </TableCell>
         <TableCell />
@@ -345,7 +347,7 @@ function LotGroup({
 
       {/* Line rows */}
       {!isCollapsed &&
-        lotLines.map((line) => {
+        lotLines.map((line, index) => {
           const confidence = getConfidence(line)
           const isExpanded = expandedLine === line.id
 
@@ -359,6 +361,7 @@ function LotGroup({
               onToggleLineDetail={onToggleLineDetail}
               onStartEdit={onStartEdit}
               onSave={onSave}
+              isEven={index % 2 === 1}
             />
           )
         })}
@@ -374,6 +377,7 @@ function LineRows({
   onToggleLineDetail,
   onStartEdit,
   onSave,
+  isEven,
 }: {
   line: DpgfLine
   confidence: PricingConfidence | null
@@ -382,13 +386,15 @@ function LineRows({
   onToggleLineDetail: (lineId: string) => void
   onStartEdit: (lineId: string, field: NonNullable<EditingCell>["field"]) => void
   onSave: (lineId: string, field: NonNullable<EditingCell>["field"], value: string) => void
+  isEven: boolean
 }) {
   return (
     <>
       <TableRow
         className={cn(
-          "cursor-pointer",
-          isExpanded && "bg-muted/20"
+          "cursor-pointer hover:bg-blue-50/50 transition-colors",
+          isExpanded && "bg-blue-50/30",
+          isEven && !isExpanded && "bg-slate-50/50"
         )}
         onClick={() => onToggleLineDetail(line.id)}
       >

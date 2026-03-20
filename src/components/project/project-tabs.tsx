@@ -1,11 +1,17 @@
 "use client"
 
 import { useRouter, usePathname } from "next/navigation"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { cn } from "@/lib/utils"
 
 interface ProjectTabsProps {
   projectId: string
   activeTab: string
+  counts?: {
+    dpgf?: number
+    memoire?: number
+    "admin-docs"?: number
+    export?: number
+  }
 }
 
 const tabs = [
@@ -24,27 +30,46 @@ function resolveActiveTab(pathname: string, projectId: string): string {
   return "dpgf"
 }
 
-export function ProjectTabs({ projectId }: ProjectTabsProps) {
+export function ProjectTabs({ projectId, counts }: ProjectTabsProps) {
   const router = useRouter()
   const pathname = usePathname()
   const currentTab = resolveActiveTab(pathname, projectId)
 
-  function handleTabChange(value: string | number) {
-    const tab = tabs.find((t) => t.value === String(value))
+  function handleTabClick(value: string) {
+    const tab = tabs.find((t) => t.value === value)
     if (tab) {
       router.push(`/projects/${projectId}${tab.path}`)
     }
   }
 
   return (
-    <Tabs value={currentTab} onValueChange={handleTabChange}>
-      <TabsList variant="line">
-        {tabs.map((tab) => (
-          <TabsTrigger key={tab.value} value={tab.value}>
-            {tab.label}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
+    <div className="border-b border-slate-200">
+      <nav className="-mb-px flex gap-6" aria-label="Onglets du projet">
+        {tabs.map((tab) => {
+          const isActive = currentTab === tab.value
+          const count = counts?.[tab.value as keyof NonNullable<typeof counts>]
+
+          return (
+            <button
+              key={tab.value}
+              onClick={() => handleTabClick(tab.value)}
+              className={cn(
+                "inline-flex items-center pb-3 pt-1 text-sm font-medium transition-colors border-b-2",
+                isActive
+                  ? "border-[#1e3a5f] text-[#1e3a5f]"
+                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+              )}
+            >
+              {tab.label}
+              {count !== undefined && count !== null && (
+                <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full ml-2">
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </nav>
+    </div>
   )
 }
