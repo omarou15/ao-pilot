@@ -89,7 +89,7 @@ export async function PATCH(request: Request) {
 
     const parsed = companySettingsSchema.safeParse(body);
     if (!parsed.success) {
-      const firstError = parsed.error.errors[0]?.message ?? "Données invalides";
+      const firstError = parsed.error.issues?.[0]?.message ?? "Données invalides";
       return NextResponse.json(
         { data: null, error: firstError },
         { status: 400 }

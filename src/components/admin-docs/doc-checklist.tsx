@@ -35,7 +35,7 @@ export function DocChecklist({
       {isGenerating && (
         <Card className="p-4 space-y-2">
           <p className="text-sm text-muted-foreground">Génération en cours...</p>
-          <Progress value={undefined} className="animate-pulse" />
+          <Progress value={0} className="animate-pulse" />
         </Card>
       )}
 
