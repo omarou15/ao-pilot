@@ -7,6 +7,9 @@ import { logAction } from "@/lib/audit";
 import type { DpgfLine } from "@/lib/types";
 import { lookupPrices } from "./lookup-prices";
 import { calculateLine } from "./calculate-line";
+import { findBestPriceMatch } from "@/lib/reference-data";
+
+const BATCH_SIZE = 5;
 
 /**
  * Price all DPGF lines for a project.
@@ -78,23 +81,37 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
     }
   }
 
-  // ─── 4. Price each line ─────────────────────────────────────────
+  // ─── 4. Price lines in parallel batches ────────────────────────
   const updatedLines: DpgfLine[] = [];
 
-  for (const line of lines as DpgfLine[]) {
-    // Skip lines without quantity — mark for user input
-    if (line.quantity === null || line.quantity <= 0) {
-      updatedLines.push({
-        ...line,
-        source_detail: {
-          ...line.source_detail,
-          _skipped: true,
-          _reason: "Quantité manquante — saisie utilisateur requise",
-        },
-      });
-      continue;
-    }
+  // Separate priceable vs skipped lines
+  const priceable = (lines as DpgfLine[]).filter(
+    (l) => l.quantity !== null && l.quantity > 0
+  );
+  const skipped = (lines as DpgfLine[])
+    .filter((l) => l.quantity === null || l.quantity <= 0)
+    .map((l) => ({
+      ...l,
+      source_detail: {
+        ...l.source_detail,
+        _skipped: true,
+        _reason: "Quantité manquante — saisie utilisateur requise",
+      },
+    }));
 
+  // Pre-filter: separate reference table matches (instant) from AI fallback lines
+  const tableMatches: DpgfLine[] = [];
+  const needsAi: DpgfLine[] = [];
+  for (const line of priceable) {
+    if (findBestPriceMatch(line.designation)) {
+      tableMatches.push(line);
+    } else {
+      needsAi.push(line);
+    }
+  }
+
+  // Helper: price a single line and update DB
+  async function priceAndUpdate(line: DpgfLine): Promise<DpgfLine> {
     try {
       const pricing = await lookupPrices(
         {
@@ -105,9 +122,8 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
         cctpContext
       );
 
-      const calculated = calculateLine(line.quantity, pricing, marginPct);
+      const calculated = calculateLine(line.quantity!, pricing, marginPct);
 
-      // ─── 6. Update line in DB ──────────────────────────────────
       const { data: updated, error: updateError } = await supabase
         .from("dpgf_lines")
         .update({
@@ -129,24 +145,44 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
           `[pricing] Failed to update line ${line.id}:`,
           updateError.message
         );
-        updatedLines.push(line);
-      } else {
-        updatedLines.push(updated as DpgfLine);
+        return line;
       }
+      return updated as DpgfLine;
     } catch (err) {
       console.error(
         `[pricing] Failed to price line "${line.designation}":`,
         err
       );
-      updatedLines.push({
+      return {
         ...line,
         source_detail: {
           ...line.source_detail,
           _error: err instanceof Error ? err.message : String(err),
         },
-      });
+      };
     }
   }
+
+  // Table matches: process sequentially (no network calls to Mistral, fast)
+  for (const line of tableMatches) {
+    updatedLines.push(await priceAndUpdate(line));
+  }
+
+  // AI fallback: process in parallel batches of BATCH_SIZE
+  for (let i = 0; i < needsAi.length; i += BATCH_SIZE) {
+    const batch = needsAi.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(batch.map(priceAndUpdate));
+
+    for (let j = 0; j < results.length; j++) {
+      const result = results[j];
+      updatedLines.push(
+        result.status === "fulfilled" ? result.value : batch[j]
+      );
+    }
+  }
+
+  // Add skipped lines at the end
+  updatedLines.push(...skipped);
 
   // ─── 7. Audit log ──────────────────────────────────────────────
   if (project?.company_id) {
