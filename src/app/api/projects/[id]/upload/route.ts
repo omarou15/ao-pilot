@@ -159,7 +159,7 @@ export async function POST(
       try {
         const parseResult = await parseFile(buffer, file.name, file.type);
         parsedContent = parseResult;
-        fileType = parseResult.documentType;
+        fileType = parseResult.fileType;
       } catch (parseError) {
         console.error(`[parseFile] Failed for ${file.name}:`, parseError);
       }
