@@ -8,6 +8,7 @@ import {
   FolderKanban,
   Settings,
   ShieldCheck,
+  HelpCircle,
   HardHat,
   PanelLeftClose,
   PanelLeft,
@@ -34,6 +35,11 @@ const navItems = [
     label: "Audit",
     href: "/admin/audit",
     icon: ShieldCheck,
+  },
+  {
+    label: "Aide",
+    href: "/aide",
+    icon: HelpCircle,
   },
 ]
 
