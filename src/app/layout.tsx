@@ -1,23 +1,25 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
-import { Inter, Space_Grotesk } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({
+const inter = localFont({
+  src: "./fonts/Inter-Variable.woff2",
   variable: "--font-inter",
-  subsets: ["latin"],
+  display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+const spaceGrotesk = localFont({
+  src: "./fonts/SpaceGrotesk-Variable.woff2",
   variable: "--font-space-grotesk",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "AO Pilot — Réponse automatisée aux appels d'offres BTP",
+  title: "AO Pilot — Réponse automatisée aux appels d'offres BTP | DJM Corp",
   description:
-    "Automatisez vos réponses aux appels d'offres BTP : DPGF chiffré, mémoire technique et documents administratifs en quelques heures.",
+    "Automatisez vos réponses aux appels d'offres BTP : DPGF chiffré, mémoire technique et documents administratifs en quelques heures. Par DJM Corp.",
 };
 
 export default function RootLayout({
