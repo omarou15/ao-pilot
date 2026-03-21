@@ -197,7 +197,7 @@ export function findLaborRate(trade: string): LaborRate | null {
     peintre: ["peinture", "peintre"],
     carreleur: ["carrelage", "carreleur", "faience"],
     "serrurier / metallier": ["serrurerie", "serrurier", "metallier", "metallerie"],
-    "facadier (ravalement)": ["facade", "facadier", "ravalement"],
+    "facadier (ravalement)": ["facade", "facadier", "ravalement", "echafaudage", "nettoyage hp", "lasurage", "garde-corps", "boiseries"],
     etancheur: ["etancheite", "etancheur"],
     "climaticien (cvc)": ["climatisation", "climaticien", "cvc"],
     "manoeuvre / aide": ["manoeuvre", "aide"],

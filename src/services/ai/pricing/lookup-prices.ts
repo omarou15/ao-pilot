@@ -55,15 +55,35 @@ export async function lookupPrices(
   }
 
   // ─── Case 2: No reference match — call Mistral AI ───────────────
-  const userMessage = `Ligne DPGF à chiffrer :
+  const isForfeiture =
+    !line.unit ||
+    line.unit === "ens" ||
+    line.unit === "forfait" ||
+    line.unit === "fft" ||
+    line.quantity === 1;
+
+  const userMessage = isForfeiture
+    ? `Ligne DPGF FORFAITAIRE à chiffrer :
+- Désignation : ${line.designation}
+- Type : FORFAIT GLOBAL (pas de prix unitaire, donner le prix total du poste)
+- IMPORTANT : Ce forfait couvre l'ensemble de la prestation décrite. Ne pas décomposer en sous-tâches détaillées. Donner directement le coût global matériau et le nombre d'heures total de main d'œuvre.
+
+Contexte CCTP :
+${cctpContext.slice(0, 4000)}
+
+Réponds UNIQUEMENT avec un JSON valide SANS commentaires :
+{"materialName":"nom court","materialUnitPrice":<prix total matériau du forfait>,"laborCategory":"corps de métier","laborHourlyRate":<taux horaire>,"estimatedHours":<heures totales pour tout le forfait>}`
+    : `Ligne DPGF à chiffrer :
 - Désignation : ${line.designation}
 - Unité : ${line.unit}
 - Quantité : ${line.quantity ?? "non précisée"}
+- IMPORTANT : Donner le prix pour UNE SEULE unité (sera multiplié par la quantité ensuite)
 
 Contexte CCTP :
 ${cctpContext.slice(0, 3000)}
 
-Réponds UNIQUEMENT en JSON valide.`;
+Réponds UNIQUEMENT avec un JSON valide SANS commentaires :
+{"materialName":"nom court","materialUnitPrice":<prix unitaire matériau>,"laborCategory":"corps de métier","laborHourlyRate":<taux horaire>,"estimatedHours":<heures pour 1 unité>}`;
 
   let aiResult: PricingBreakdown | null = null;
 
@@ -79,8 +99,15 @@ Réponds UNIQUEMENT en JSON valide.`;
     const responseText =
       typeof response === "string" ? response : String(response);
 
+    // Clean JS comments that Mistral sometimes adds to JSON
+    const cleanedResponse = responseText
+      .replace(/\/\/[^\n]*/g, "")           // Remove // comments
+      .replace(/\/\*[\s\S]*?\*\//g, "")     // Remove /* */ comments
+      .replace(/,\s*([}\]])/g, "$1")        // Remove trailing commas
+      .trim();
+
     // Extract JSON from response (handle possible markdown code blocks)
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    const jsonMatch = cleanedResponse.match(/\{[\s\S]*?\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]) as {
         materialName?: string;

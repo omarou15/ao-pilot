@@ -55,7 +55,7 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
         return String(f.parsed_content ?? "");
       })
       .join("\n")
-      .slice(0, 8000); // Limit context size
+      .slice(0, 15000); // Increased from 8000 for better forfait pricing
   }
 
   // ─── 3. Fetch company for default_margin ────────────────────────

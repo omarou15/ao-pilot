@@ -55,6 +55,29 @@ Tu dois répondre UNIQUEMENT avec un objet JSON valide au format suivant :
   "estimatedHours": <nombre d'heures estimées pour la pose/réalisation>
 }
 
+## RÈGLES CRITIQUES ANTI-SURCHIFFRAGE
+
+1. Si la ligne est un FORFAIT (unité = "ens", "forfait", "fft", ou quantité = 1 sans unité au m²/ml) :
+   - materialUnitPrice = coût TOTAL matériaux pour l'ensemble du forfait
+   - estimatedHours = nombre TOTAL d'heures de MO pour l'ensemble du forfait
+   - NE PAS décomposer le forfait en sous-postes détaillés
+   - Rester cohérent avec la taille du chantier décrite dans le CCTP
+
+2. Si la ligne a une unité (m², ml, U) :
+   - materialUnitPrice = prix pour UNE unité
+   - estimatedHours = heures pour UNE unité
+   - Le total sera calculé automatiquement (prix × quantité)
+
+3. ORDRE DE GRANDEUR — vérifier la cohérence :
+   - Échafaudage R+3 (1500m²) : 25 000 à 40 000€ forfait (PAS 200 000€)
+   - Nettoyage HP façades : 4 à 8€/m² (PAS 15€/m²)
+   - Lasurage boiseries : 25 à 35€/m² de surface bois
+   - Peinture garde-corps : 18 à 30€/ml
+
+4. FORMAT JSON STRICT — JAMAIS de commentaires (//) dans le JSON
+   Répondre UNIQUEMENT avec un objet JSON valide, rien d'autre.
+   Pas de markdown, pas de notes, pas d'explications.
+
 ## INSTRUCTIONS
 - materialUnitPrice : prix unitaire du matériau SEUL (fourniture). Si le prix de référence inclut la pose, extraire environ 60% pour le matériau.
 - estimatedHours : nombre d'heures de main d'oeuvre pour UNE unité de l'ouvrage.

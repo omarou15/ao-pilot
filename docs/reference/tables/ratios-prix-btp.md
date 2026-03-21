@@ -90,6 +90,18 @@
 | Charpente fermette industrielle | m² | 45 € | 80 € | **80 €/m²** |
 | Zinguerie (gouttières, descentes) | ml | 30 € | 70 € | **70 €/ml** |
 
+## Ravalement / Façades
+
+| Ouvrage | Unité | Fourchette basse | Fourchette haute | Prix retenu |
+|---|---|---|---|---|
+| Échafaudage ravalement (R+3) | m² façade | 15 € | 25 € | **25 €/m²** |
+| Nettoyage HP façade | m² | 4 € | 8 € | **8 €/m²** |
+| Traitement biocide façade | m² | 2 € | 5 € | **5 €/m²** |
+| Lasurage boiseries extérieures | m² bois | 25 € | 35 € | **35 €/m²** |
+| Peinture garde-corps métal | ml | 18 € | 30 € | **30 €/ml** |
+| Peinture façade (2 couches) | m² | 20 € | 35 € | **35 €/m²** |
+| Ravalement complet (nettoyage + peinture) | m² | 35 € | 60 € | **60 €/m²** |
+
 ---
 
 ## Notes d'utilisation pour l'IA
