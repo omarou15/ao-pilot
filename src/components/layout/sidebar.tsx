@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { UserButton } from "@clerk/nextjs"
+import { UserButton, useClerk, useUser } from "@clerk/nextjs"
 import {
   LayoutDashboard,
   FolderKanban,
@@ -12,6 +12,7 @@ import {
   HardHat,
   PanelLeftClose,
   PanelLeft,
+  LogOut,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -51,6 +52,8 @@ interface SidebarProps {
 
 export function Sidebar({ onNavigate, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname()
+  const { signOut } = useClerk()
+  const { user } = useUser()
 
   return (
     <div
@@ -111,20 +114,40 @@ export function Sidebar({ onNavigate, isCollapsed = false, onToggleCollapse }: S
         })}
       </nav>
 
-      {/* User button */}
-      <div className="border-t border-white/10 px-4 py-4">
-        <UserButton
-          appearance={{
-            elements: {
-              rootBox: isCollapsed ? "w-8" : "w-full",
-              userButtonTrigger: cn(
-                "w-full justify-start",
-                isCollapsed && "justify-center"
-              ),
-              userButtonAvatarBox: "w-8 h-8",
-            },
-          }}
-        />
+      {/* User section */}
+      <div className="border-t border-white/10 px-3 py-4 space-y-3">
+        <div className={cn("flex items-center gap-3 px-1", isCollapsed && "justify-center")}>
+          <UserButton
+            appearance={{
+              elements: {
+                rootBox: "shrink-0",
+                userButtonAvatarBox: "w-8 h-8",
+              },
+            }}
+          />
+          {!isCollapsed && user && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">
+                {user.fullName || user.firstName || "Utilisateur"}
+              </p>
+              <p className="text-xs text-white/50 truncate">
+                {user.primaryEmailAddress?.emailAddress}
+              </p>
+            </div>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => signOut({ redirectUrl: "/" })}
+          title={isCollapsed ? "Se déconnecter" : undefined}
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium w-full text-white/60 hover:text-red-300 hover:bg-white/10 transition-colors duration-200",
+            isCollapsed && "justify-center"
+          )}
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          {!isCollapsed && "Se déconnecter"}
+        </button>
       </div>
     </div>
   )
