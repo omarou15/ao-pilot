@@ -26,9 +26,10 @@ export interface PricingBreakdown {
  */
 export async function lookupPrices(
   line: { designation: string; unit: string; quantity: number | null },
-  cctpContext: string
+  cctpContext: string,
+  cachedPriceMatch?: ReturnType<typeof findBestPriceMatch>
 ): Promise<PricingBreakdown> {
-  const priceMatch = findBestPriceMatch(line.designation);
+  const priceMatch = cachedPriceMatch ?? findBestPriceMatch(line.designation);
   const laborMatch = findLaborRate(line.designation);
 
   // ─── Case 1: Reference table match found ────────────────────────

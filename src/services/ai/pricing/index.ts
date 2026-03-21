@@ -82,36 +82,39 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
   }
 
   // ─── 4. Price lines in parallel batches ────────────────────────
-  const updatedLines: DpgfLine[] = [];
+  // Results map keyed by line ID to preserve original sort_order
+  const resultsById = new Map<string, DpgfLine>();
 
-  // Separate priceable vs skipped lines
-  const priceable = (lines as DpgfLine[]).filter(
-    (l) => l.quantity !== null && l.quantity > 0
-  );
-  const skipped = (lines as DpgfLine[])
-    .filter((l) => l.quantity === null || l.quantity <= 0)
-    .map((l) => ({
-      ...l,
-      source_detail: {
-        ...l.source_detail,
-        _skipped: true,
-        _reason: "Quantité manquante — saisie utilisateur requise",
-      },
-    }));
-
-  // Pre-filter: separate reference table matches (instant) from AI fallback lines
-  const tableMatches: DpgfLine[] = [];
+  // Classify lines and cache findBestPriceMatch results
+  const tableMatchLines: { line: DpgfLine; match: NonNullable<ReturnType<typeof findBestPriceMatch>> }[] = [];
   const needsAi: DpgfLine[] = [];
-  for (const line of priceable) {
-    if (findBestPriceMatch(line.designation)) {
-      tableMatches.push(line);
+
+  for (const line of lines as DpgfLine[]) {
+    if (line.quantity === null || line.quantity <= 0) {
+      resultsById.set(line.id, {
+        ...line,
+        source_detail: {
+          ...line.source_detail,
+          _skipped: true,
+          _reason: "Quantité manquante — saisie utilisateur requise",
+        },
+      });
+      continue;
+    }
+
+    const match = findBestPriceMatch(line.designation);
+    if (match) {
+      tableMatchLines.push({ line, match });
     } else {
       needsAi.push(line);
     }
   }
 
   // Helper: price a single line and update DB
-  async function priceAndUpdate(line: DpgfLine): Promise<DpgfLine> {
+  async function priceAndUpdate(
+    line: DpgfLine,
+    cachedMatch?: NonNullable<ReturnType<typeof findBestPriceMatch>>
+  ): Promise<DpgfLine> {
     try {
       const pricing = await lookupPrices(
         {
@@ -119,7 +122,8 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
           unit: line.unit ?? "u",
           quantity: line.quantity,
         },
-        cctpContext
+        cctpContext,
+        cachedMatch
       );
 
       const calculated = calculateLine(line.quantity!, pricing, marginPct);
@@ -163,26 +167,32 @@ export async function priceDpgf(projectId: string): Promise<DpgfLine[]> {
     }
   }
 
-  // Table matches: process sequentially (no network calls to Mistral, fast)
-  for (const line of tableMatches) {
-    updatedLines.push(await priceAndUpdate(line));
+  // Table matches: process sequentially (no Mistral calls, fast)
+  // Pass cached match to avoid redundant findBestPriceMatch in lookupPrices
+  for (const { line, match } of tableMatchLines) {
+    resultsById.set(line.id, await priceAndUpdate(line, match));
   }
 
   // AI fallback: process in parallel batches of BATCH_SIZE
   for (let i = 0; i < needsAi.length; i += BATCH_SIZE) {
     const batch = needsAi.slice(i, i + BATCH_SIZE);
-    const results = await Promise.allSettled(batch.map(priceAndUpdate));
+    const results = await Promise.allSettled(
+      batch.map((line) => priceAndUpdate(line))
+    );
 
     for (let j = 0; j < results.length; j++) {
       const result = results[j];
-      updatedLines.push(
+      resultsById.set(
+        batch[j].id,
         result.status === "fulfilled" ? result.value : batch[j]
       );
     }
   }
 
-  // Add skipped lines at the end
-  updatedLines.push(...skipped);
+  // Rebuild in original sort_order
+  const updatedLines = (lines as DpgfLine[]).map(
+    (line) => resultsById.get(line.id) ?? line
+  );
 
   // ─── 7. Audit log ──────────────────────────────────────────────
   if (project?.company_id) {
